@@ -8,6 +8,15 @@ public class Products {
     private String itemName;
     private BigDecimal price;
     private String type;
+    private int amount = 6;
+
+    public void setAmount() {
+        this.amount -= 1;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
 
     public Products(String slotLocation, String itemName, BigDecimal price, String type) {
         this.slotLocation = slotLocation;
