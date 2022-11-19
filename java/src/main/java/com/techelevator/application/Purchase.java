@@ -1,7 +1,6 @@
 package com.techelevator.application;
 
-import com.techelevator.models.Products;
-import com.techelevator.models.QuipOutput;
+import com.techelevator.models.*;
 import com.techelevator.ui.UserInput;
 
 import java.math.BigDecimal;
@@ -14,6 +13,10 @@ public class Purchase {
         Scanner input = new Scanner(System.in);
         BigDecimal Balance = new BigDecimal("0");
         boolean keepLooping = true;
+        AuditFileAddMoney auditFileAddMoney = new AuditFileAddMoney();
+        AuditForPurchase auditForPurchase = new AuditForPurchase();
+        ChangeAudit changeAudit = new ChangeAudit();
+
 
 
         while (keepLooping) {
@@ -25,11 +28,16 @@ public class Purchase {
                 while (enter) {
                     System.out.println("Please input whole dollar amounts: $1 , $5, $10, $20, please enter (E) when you finish input.");
                     String inputAmount = input.nextLine();
-                    if (!inputAmount.equalsIgnoreCase("E")) {
-                        Balance = Balance.add(new BigDecimal(inputAmount));
-                        System.out.println(" Current Money Provided: $" + Balance);
-                    } else {
-                        enter = false;
+                    if(inputAmount.equalsIgnoreCase("1") || inputAmount.equalsIgnoreCase("5") || inputAmount.equalsIgnoreCase("10") || inputAmount.equalsIgnoreCase("20") || inputAmount.equalsIgnoreCase("E")) {
+                        if (!inputAmount.equalsIgnoreCase("E")) {
+                            Balance = Balance.add(new BigDecimal(inputAmount));
+                            System.out.println(" Current Money Provided: $" + Balance);
+                            auditFileAddMoney.addingToTheAuditFile(inputAmount, Balance);
+                        } else {
+                            enter = false;
+                        }
+                    }else{
+                        System.out.println("Please enter a valid amount or (E)");
                     }
                 }
 
@@ -51,10 +59,13 @@ public class Purchase {
                     } else if (test2.getMapOfItemAmount().get(userInput) > 0) {
                         //adds item to cart
                         if (Balance.compareTo(test2.getMapOfItemPrice().get(userInput)) > 0) {
+                            BigDecimal tempBalance = Balance;
                             Balance = Balance.subtract(test2.getMapOfItemPrice().get(userInput));
                             System.out.println(test2.getMapOfItemNames().get(userInput) + ", " + test2.getMapOfItemPrice().get(userInput) + ", remaining balance $" + Balance);
                             System.out.println(quipGrab.getQuip(test2.getMapOfItemType().get(userInput)));
                             test2.reduceMapOfItemAmount(userInput);
+                            auditForPurchase.addingToTheAuditFilePurchase(tempBalance, Balance, userInput,test2.getMapOfItemNames().get(userInput));
+
                         } else {
                             System.out.println("Not enough money in the machine. Please input more money");
                         }
@@ -75,11 +86,13 @@ public class Purchase {
 
                         } else if (test2.getMapOfItemAmount().get(userInput2) > 0) {
                             //adds item to cart
-                            if (Balance.compareTo(test2.getMapOfItemPrice().get(userInput2)) > 0) {
+                            if (Balance.compareTo(test2.getMapOfItemPrice().get(userInput2)) >= 0) {
+                                BigDecimal tempBalance = Balance;
                                 Balance = Balance.subtract((test2.getMapOfItemPrice().get(userInput2).subtract(new BigDecimal("1"))));
                                 System.out.println(test2.getMapOfItemNames().get(userInput2) + ", " + test2.getMapOfItemPrice().get(userInput2) + ", remaining balance $" + Balance);
                                 System.out.println(quipGrab.getQuip(test2.getMapOfItemType().get(userInput2)));
                                 test2.reduceMapOfItemAmount(userInput2);
+                                auditForPurchase.addingToTheAuditFilePurchase(tempBalance, Balance, userInput,test2.getMapOfItemNames().get(userInput));
 
                             } else {
                                 System.out.println("Not enough money in the machine. Please input more money");
@@ -103,10 +116,11 @@ public class Purchase {
 
 
             if (option.equalsIgnoreCase("F")) {
-
+                ProvideChange provideChange = new ProvideChange();
                 //Please edit this part. we only have this and audit file left.
-
-
+                changeAudit.addingToAuditFileChange(Balance);
+                provideChange.calcChange(Balance);
+                keepLooping = false;
 
             }
 
