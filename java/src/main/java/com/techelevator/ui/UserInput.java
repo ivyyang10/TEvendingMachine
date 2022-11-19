@@ -46,6 +46,14 @@ public class UserInput
         }
 
     }
+    public static void getPurchaseScreenOption(){
+
+        System.out.println("Please select from following option: ");
+        System.out.println("(M) Feed Money");
+        System.out.println("(S) Select Item");
+        System.out.println("(F) Finish Transaction");
+
+    }
 
     
 }
